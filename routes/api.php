@@ -20,7 +20,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('posts')
             ->controller(PostController::class)
             ->group(function () {
-                Route::post('/', 'index');
+                Route::get('/', 'index');
                 Route::delete('{post}', 'destroy');
                 Route::delete('{post}', 'show');
                 Route::post('/', 'store');
@@ -29,7 +29,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('users')
             ->controller(UserController::class)
             ->group(function () {
-                Route::post('/', 'index');
+                Route::get('/', 'index');
                 Route::delete('{post}', 'show');
             });
     });

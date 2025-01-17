@@ -10,11 +10,19 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json([
-            "users" => User::all()
+        $validated = $request->validate([
+            'page' => 'integer|min:0',
+            'size' => 'integer|min:1'
         ]);
+
+        return response()->json(User::paginate(
+            $validated['size'] ?? 10,
+            ['*'],
+            'page',
+            $validated['page'] ?? 0
+        ));
     }
 
     /**
@@ -24,20 +32,4 @@ class UserController extends Controller
     {
         return response()->json($user->with('posts'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    // public function update(Request $request, User $user)
-    // {
-    //     //
-    // }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    // public function destroy(User $user)
-    // {
-    //     //
-    // }
 }

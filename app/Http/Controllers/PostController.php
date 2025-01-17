@@ -14,13 +14,16 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate([
-            'page' => 'min:0',
-            'size' => 'integer'
+        $validated = $request->validate([
+            'page' => 'integer|min:0',
+            'size' => 'integer|min:1'
         ]);
 
-        return response()->json(Post::paginate(
-            $request->input('size')
+        return response()->json(Post::with('attachments')->paginate(
+            $validated['size'] ?? 10,
+            ['*'],
+            'page',
+            $validated['page'] ?? 0
         ));
     }
 
@@ -29,9 +32,10 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'caption' => 'required',
-            'attachment.*' => 'required|image|file|max:2400'
+        $validated = $request->validate([
+            'caption' => 'required|string|max:255',
+            'attachments' => 'required|array',
+            'attachments.*' => 'required|image|mimes:jpg,jpeg,webp,png,gif|max:2048',
         ]);
 
         /**
@@ -40,10 +44,10 @@ class PostController extends Controller
         $user = Auth::user();
 
         $post = $user->posts()->create([
-            $request->input('caption')
+            'caption' => $validated['caption']
         ]);
 
-        foreach ($request->file('attachment') as $file) {
+        foreach ($request->file('attachments') as $file) {
             $path = $file->store('posts', 'public');
 
             $post->attachments()->create([
@@ -61,7 +65,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return response()->json($post);
+        return response()->json($post->load('attachments'));
     }
 
     /**
@@ -77,6 +81,12 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        if (Auth::id() !== $post->user_id) {
+            return response([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+
         foreach ($post->attachments() as $attachment) {
             if (Storage::exists($attachment->storage_path)) {
                 Storage::delete($attachment->storage_path);
