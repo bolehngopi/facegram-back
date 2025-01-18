@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('storage_path');
             $table->foreignId('post_id')->constrained('posts')->cascadeOnDelete();
-            $table->timestamps();
         });
     }
 

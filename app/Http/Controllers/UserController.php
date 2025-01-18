@@ -30,6 +30,6 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return response()->json($user->with('posts'));
+        return response()->json($user->load(['posts', 'posts.attachments']));
     }
 }

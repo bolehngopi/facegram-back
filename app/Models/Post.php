@@ -12,10 +12,20 @@ class Post extends Model
 
     protected $fillable = [
         'caption',
-        'user_id'
+        'post_id'
     ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
 
     public function attachments() {
         return $this->hasMany(PostAttachment::class);
+    }
+
+    public function casts() {
+        return [
+            'created_at' => 'datetime'
+        ];
     }
 }

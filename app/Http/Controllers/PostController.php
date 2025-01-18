@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\File;
 
 class PostController extends Controller
 {
@@ -19,7 +20,7 @@ class PostController extends Controller
             'size' => 'integer|min:1'
         ]);
 
-        return response()->json(Post::with('attachments')->paginate(
+        return response()->json(Post::with(['attachments', 'user'])->paginate(
             $validated['size'] ?? 10,
             ['*'],
             'page',
@@ -35,7 +36,7 @@ class PostController extends Controller
         $validated = $request->validate([
             'caption' => 'required|string|max:255',
             'attachments' => 'required|array',
-            'attachments.*' => 'required|image|mimes:jpg,jpeg,webp,png,gif|max:2048',
+            'attachments.*' => ['required', File::types(["jpg", "jpeg", "webp", "png", "gif"])->max(1024)],
         ]);
 
         /**

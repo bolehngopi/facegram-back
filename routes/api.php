@@ -30,7 +30,7 @@ Route::prefix('v1')->group(function () {
             ->controller(UserController::class)
             ->group(function () {
                 Route::get('/', 'index');
-                Route::delete('{post}', 'show');
+                Route::get('/{user}', 'show');
             });
     });
 });
